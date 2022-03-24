@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
+	
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	<script src='https://cdn.plot.ly/plotly-2.9.0.min.js'></script>
+  </head>
+<style>
+.navbar-light .navbar-nav .nav-link {
+color: #007bff;
+}
+
+nav{
+background-color: #5EE6EB;
+}
+
+.navbar-nav mr-auto{
+margin-right:20px;
+}
+
+h3{
+color:#1e9cb0;
+text-align:center;
+margin-top: 250px;
+}
+
+#file_upload{
+margin-left:100px;
+position: fixed;
+bottom: 50px;
+}
+
+table, th, td {
+border:1px solid #5EE6EB;
+}
+
+#data_names{
+margin-left:100px;
+margin-top:100px;
+}
+
+select{
+width:100%;}
+
+.row1{
+margin-top:30px;
+margin-left:50px;
+}
+.row2{
+margin-top:50px;
+margin-left:50px;
+}
+
+.nav-tabs .nav-link.active {
+color: #495057;
+background-color: #5EE6EB;
+border : none;
+text-decoration: underline;
+text-decoration-color: red;
+}
+
+.nav-tabs .nav-link {
+color: #495057;
+background-color: #5EE6EB;
+border : none;
+
+}
+
+</style>
+  <body>
+     <nav class="navbar navbar-expand-lg navbar-light" style="z-index: 99999">
+      <a class="navbar-brand" 
+        ><img src="{{url_for('static', filename='xvector_icon.PNG')}}" style="height: 50px; width: 50px"
+      /></a>
+     
+      <div class="collapse navbar-collapse" id="navbarSupportedContent" >
+        <ul class="nav ml-auto nav-tabs" id="myTab" role="tablist" >
+          <li class="nav-item">
+            <a id="home-tab"
+              class="nav-link active"
+              data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true"
+              >Home</a >
+          </li>
+		  <li class="nav-item">
+            <a id="data-tab"
+              class="nav-link"
+             data-toggle="tab" href="#data" role="tab" aria-controls="data" aria-selected="false" onclick="hit_dataset()"
+              >Data</a>
+          </li>
+		  <li class="nav-item">
+            <a i="plot-tab"
+              class="nav-link"
+             data-toggle="tab" href="#plot" role="tab" aria-controls="plot" aria-selected="false" onclick="hit_dataset()"
+              >Plot</a>
+          </li>
+		  </ul>
+		  </div>
+    </nav>  
+	 <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+			<h3>Home Page</h3>
+		</div>
+		<div class="tab-pane fade" id="data" role="tabpanel" aria-labelledby="data-tab">
+			<div id="data_names">
+			<table id="tale_data_names" style="width:20%">
+			  <!-- <tr>
+				<td>data1</td>
+			  </tr>
+			  <tr>
+				<td>data2</td>
+			  </tr> -->
+        {% for data in datas %}
+        <tr><td>{{ data }}</td></tr>
+        {% endfor %}
+			</table>
+		</div>
+		<div id="file_upload">
+			<form name="upload-form" method="post" enctype="multipart/form-data">
+			<input type="file" id="files" name="files" />
+			<br>
+			<div style="margin-top:10px">
+			<input type="text" id="data_name" name="data_name" placeholder="Data file name">
+			<button type="submit" class="btn btn-sm"  style="background-color:#5EE6EB" id="upload" value="Upload" onclick="fileUpload()">Upload</button>   
+			</div>
+			</form>
+		</div>
+		</div>
+		<div class="tab-pane fade" id="plot" role="tabpanel" aria-labelledby="plot-tab">
+	<form name="compute_form" id="compute_form" method="post" >
+	<div class="row row1"> 
+	  <div class="col-md-2" >
+		<select name="select_data_name"  id="select_data_name">
+		{% for data in datas %}
+		  <option value="{{data}}">{{data}}</option>
+		{% endfor %}         
+		</select>
+		</div>
+		<div class="col-md-2" >
+		<input type="text" id="column_name" name="column_name">
+		</div>
+		<div class="col-md-2" >
+		<select name="operation"  id="operation">
+		  <option value="max">max</option>
+		  <option value="min">min</option>  
+		  <option value="sum">sum</option>  	  
+		</select>
+		</div>
+		<div class="col-md-2" >
+		<button class="btn btn-sm" id="compute" type="submit" name="compute" style="width:50%;background-color:#5EE6EB" >Compute</button>
+		</div>
+		<div class="col-md-2" >
+		<input type="text" id="column_val" name="column_val">
+		</div>
+   </div>
+   </form>
+   <form name="plot_form" id="plot_form" method="post" >
+   <div class="row row2">     
+	  <div class="col-md-2" >
+		<select name="plot_data"  id="plot_data">
+		{% for data in datas %}
+			<option value="{{data}}">{{data}}</option>
+		{% endfor %}             
+		</select>
+		</div>
+		<div class="col-md-2" >
+		<input type="text" id="column1_name" name="column1_name">
+		</div>
+		<div class="col-md-2" >
+		<input type="text" id="column2_name" name="column2_name">
+		</div>
+		<div class="col-md-2" >
+		<button  class="btn btn-sm" id="plot" type="submit" name="plot" style="width:50%;background-color:#5EE6EB">Plot</button>
+		</div>
+	</div>
+	</form>
+	
+	<div id='plot_result'>
+		
+	</div>
+		</div>
+	 </div>
+</body>
+<script type="text/javascript">
+ $(document).ready(function() {[]
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		// alert($(e.target).attr('href'));	
+      localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    var activeTab = localStorage.getItem('activeTab');
+	// alert(activeTab)
+    if(activeTab){
+        $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+    }
+    localStorage.clear('activeTab');
+    });
+
+	function hit_dataset(){
+
+$.ajax({
+		type: "GET",
+		url: "/dataset",
+		success: function(response) {
+			if(response){
+				var table_result = $('<div />').append(response).find('#data_names').html();
+				 $('#data_names').html(table_result);
+				var select_result = $('<div />').append(response).find('#select_data_name').html();
+				 $('#select_data_name').html(select_result);
+				var plot_result = $('<div />').append(response).find('#plot_data').html();
+				 $('#plot_data').html(plot_result);
+			}
+		},
+	});
+}
+
+
+function fileUpload(){
+	$('form[name="upload-form"]').submit(function(e) {
+        // Serialize the form data. The entire form is passed as a parameter.
+        const formData = new FormData($(this)[0]);
+        // Send the data via ajax.
+		e.preventDefault();
+		$.ajax({
+          type: 'POST',
+          url: '/dataset',
+          data: formData,
+		  contentType: false,
+		  processData: false,
+		  success: function(response) {
+				if(response){
+				   window.location.href= "/dataset";
+				}
+            },
+        });
+	});
+}
+
+$(document).on('submit','#compute_form',function(e){
+     data_name = document.getElementById("select_data_name").value;
+	 column_name_val = document.getElementById("column_name").value;
+	 operation_val = document.getElementById("operation").value;   
+	 url="/dataset/"+data_name+"/compute";       
+     var myData = {
+		 'column_name' : column_name_val,
+		 'operation' : operation_val
+	 }
+	 e.preventDefault();
+     $.post(url,myData, 
+    function(returnedData){
+		 document.getElementById("column_val").value=returnedData.result;
+	}).fail(function(){
+      console.log("error");
+	});
+    });
+
+	$(document).on('submit','#plot_form',function(e){
+     data_name = document.getElementById("plot_data").value;
+	 column1_name_val = document.getElementById("column1_name").value;
+	 column2_name_val = document.getElementById("column2_name").value;  
+	 x_array=[];
+     y_array=[];
+     key_array=[] ;
+	 key_list_dict = {};
+	 x_min =0;
+	 y_min=0;
+	 x_max=0;
+	 y_max=0;
+	 x_range=[];
+	 y_range=[];
+	 url="/dataset/"+data_name+"/plot";       
+     var myData = {
+		 'column1' : column1_name_val,
+		 'column2' : column2_name_val
+	 }
+	 e.preventDefault();
+     $.get(url,myData, 
+    function(returnedData){
+		 key_list_dict=returnedData[0]
+	for (const [key, value] of Object.entries(key_list_dict)) {
+	key_array.push(key)
+	}
+	returnedData.forEach(function(item) {
+	Object.keys(item).forEach(function(key) {
+		if(key == key_array[0] )
+		{
+			x_array.push(item[key])
+		}
+		if(key == key_array[1] )
+		{
+			y_array.push(item[key])
+		}
+	});
+	});
+	 x_array.sort();
+	 x_min = x_array[0];
+	 x_max=x_array[x_array.length-1];
+	 y_array.sort();
+	 y_min=y_array[0];
+	 y_max=y_array[y_array.length-1];
+	 x_range.push(x_min);
+	 x_range.push(x_max);
+	 y_range.push(y_min);
+	 y_range.push(y_max);
+	var trace1 = {
+	x: x_array,
+	y: y_array,
+	mode: 'markers',
+	type: 'scatter',
+	text: ['A-1', 'A-2', 'A-3', 'A-4', 'A-5'],
+	marker: { size: 12 }
+	};
+
+
+	var data = [ trace1 ];
+
+	var layout = {
+	xaxis: {
+		range: x_range
+	},
+	yaxis: {
+		range: y_range
+	},
+	
+	};
+	Plotly.newPlot('plot_result', data, layout);
+		}).fail(function(){
+		console.log("error");
+		});
+		});	
+
+</script>
+<html>
