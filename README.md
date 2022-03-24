@@ -4,7 +4,7 @@ xVectorLabs Assessment
 
 ## Steps to execute
 
-1. Clone the Repo into your local system
+1. Clone the 'master' branch from 'xvector' Repo into your local system
 
 2. create and activate a virtual python environment
 
